@@ -62,7 +62,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base,
   }
 }
 
-void comm_wifi_init(void)
+void paltform_wifi_init(void)
 {
   //Configuring wifi task
   s_wifi_event_group = xEventGroupCreate();
@@ -84,7 +84,7 @@ void comm_wifi_init(void)
                                                       NULL,
                                                       &instance_got_ip));
 }
-void comm_wifi_start(uint8_t* inputSSID, uint8_t* inputPass)
+void platform_wifi_start(uint8_t* inputSSID, uint8_t* inputPass)
 {
     wifi_config_t wifi_config = {
         .sta = {
@@ -196,8 +196,8 @@ void app_main(void)
     ESP_ERROR_CHECK(nvs_flash_init());
 
     // Initialise ESP32 in SoftAP mode
-    comm_wifi_init();
-    comm_wifi_start((uint8_t*)"SpectrumSetup-58", (uint8_t*)"fastcrown231");
+    paltform_wifi_init();
+    platform_wifi_start((uint8_t*)"insert_ssid", (uint8_t*)"insert_password");
 
     // Start the server for the first time
     static httpd_handle_t server = NULL;
