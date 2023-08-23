@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script>
+        function send() {
+            var name = document.getElementById("ssid").value;
+            var email = document.getElementById("password").value;
+            var result = document.getElementById("result");
+           
+              const json = {
+                  ssid: name,
+                  password: email,
+            };
+            
+            fetch("/auth", {
+                body: JSON.stringify(json),
+                method: "POST",
+                cache: 'no-cache',
+                credentials: 'same-origin',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                redirect: 'follow',
+            }).then(result => {
+                console.log(result);
+                console.log(result.headers);
+                window.location = result.url
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <h1 style="color: rgb(0, 0, 0)">Setup your Platform Device</h1>
+    <input type="text" id="ssid" placeholder="Home SSID" />
+    <input type="text" id="password" placeholder="Password" />
+    <button onclick="send()">Send</button>
+</body>
+ 
+</html>

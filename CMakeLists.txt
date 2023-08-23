@@ -1,10 +1,6 @@
-# Copyright (c) 2021 Nordic Semiconductor ASA
-# SPDX-License-Identifier: Apache-2.0
-#
-# This CMake file is picked by the Zephyr build system because it is defined
-# as the module CMake entry point (see zephyr/module.yml).
+# The following lines of boilerplate have to be in your project's CMakeLists
+# in this exact order for cmake to work correctly
+cmake_minimum_required(VERSION 3.16)
 
-zephyr_include_directories(include)
-
-add_subdirectory(drivers)
-add_subdirectory(lib)
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+project(platform_api)
