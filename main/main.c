@@ -23,8 +23,8 @@ void app_main(void)
 
     // Wifi Initialization
     platform_wifi_cfg_t wifi_cfg = {
-    .ssid = "SpectrumSetup-58",
-    .password = "fastcrown231",
+    .ssid = "test_ssid",
+    .password = "test_password",
     .conn_attempts = 5,
    };
 
