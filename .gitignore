@@ -9,4 +9,7 @@
 # build
 build/*
 managed_components/*
+
+# test
+test_server/node_modules/*
 __pycache__/
