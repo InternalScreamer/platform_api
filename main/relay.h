@@ -1,6 +1,6 @@
 
-#ifndef PLATFORM_RELAY_H
-#define PLATFORM_RELAY_H
+#ifndef RELAY_H_
+#define RELAY_H_
 
 #include <stdint.h>
 
@@ -13,7 +13,7 @@ typedef struct platform_relay_s{
     uint8_t relay_num;
 } platform_relay_t;
 
-void init_relay(uint32_t* gpio,uint8_t* active_level, uint8_t gpio_num);
+void relay_init(uint32_t* gpio,uint8_t* active_level, uint8_t gpio_num);
 
 uint8_t get_relay_num(void);
 
@@ -21,4 +21,6 @@ uint8_t get_relay(uint8_t relay_num);
 
 void set_relay(uint32_t relay_num, uint8_t pwr_on);
 
-#endif
+void relay_close(void);
+
+#endif // RELAY_H_

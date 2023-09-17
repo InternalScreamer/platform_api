@@ -3,43 +3,32 @@
 #include <strings.h>
 #include "unistd.h"
 #include <stdint.h>
+#include "esp_system.h"
 
-#include "esp_http_server.h"
 #include "nvs_flash.h"
+#include "nvs.h"
+#include "relay.h"
 
 // platform specific libraries
-//#include "platform_ap_server.h"
-#include "platform_plug_server.h"
-#include "platform_wifi_client.h"
-#include "platform_relay.h"
+#include "controller.h"
 
 void app_main(void)
 {
+    //Initialize NVS
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      ret = nvs_flash_init();
+    }
     // Relay Initialization
-   uint32_t gpios[2] = {18, 17};
+   uint32_t gpios[2] = {25, 21};
    uint8_t gpio_num = 2;
    uint8_t active_level[2] = {0, 0};
-   init_relay(gpios, active_level, gpio_num);
+   relay_init(gpios, active_level, gpio_num);
 
-    // Wifi Initialization
-    platform_wifi_cfg_t wifi_cfg = {
-    .ssid = "test_ssid",
-    .password = "test_password",
-    .conn_attempts = 5,
-   };
-
-    // Initialize NVS needed by Wi-Fi
-    ESP_ERROR_CHECK(nvs_flash_init());
-    wifi_client_init();
-    wifi_client_configure(&wifi_cfg);
-    wifi_client_connect();
-
-    // Start the server for the first time
-    static httpd_handle_t server = NULL;
-    server = start_plug_server();
-    // Start the DNS server that will redirect all queries to the softAP IP
-
-    while(server) {
+    controller_init();
+    controller_start();
+    while(1) {
         sleep(5);
     }
 }

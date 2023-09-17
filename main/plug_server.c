@@ -1,17 +1,27 @@
-#include "platform_plug_server.h"
+#include "plug_server.h"
 #include "esp_http_server.h"
 
 
 #include "esp_log.h"
 #include "esp_vfs.h"
 #include "cJSON.h"
-#include "platform_relay.h"
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
+
+// Platform Libraries
+#include "relay.h"
+#include "controller.h"
 
 static const char *TAG = "Plug Server";
 extern const char plug_start[] asm("_binary_plug_control_html_start");
 extern const char plug_end[] asm("_binary_plug_control_html_end");
+
 #define FILE_PATH_MAX (ESP_VFS_PATH_MAX + 128)
 #define SCRATCH_BUFSIZE (5120)
+
+static httpd_handle_t server = NULL;
+static QueueHandle_t s_queue;
 
 typedef struct rest_server_context {
     char base_path[ESP_VFS_PATH_MAX + 1];
@@ -26,7 +36,6 @@ static esp_err_t plug_page_get_handler(httpd_req_t *req)
     httpd_resp_send(req, plug_start, plug_len);
     return ESP_OK;
 }
-
 
 static esp_err_t plug_ctrl_api_post_handler(httpd_req_t *req)
 {
@@ -59,20 +68,17 @@ static esp_err_t plug_ctrl_api_post_handler(httpd_req_t *req)
     cJSON_Delete(root);
     httpd_resp_sendstr(req, "Post control value successfully");
     return ESP_OK;
-
-    return ESP_OK;
 }
 
 static const httpd_uri_t plug_page_api_uri = {
-    .uri = "/plug_control",
+    .uri = "/",
     .method = HTTP_GET,
     .handler = plug_page_get_handler
 };
 
-httpd_handle_t start_plug_server(void)
+void start_plug_server(QueueHandle_t queue)
 {
-
-    httpd_handle_t server = NULL;
+    s_queue = queue;
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.max_open_sockets = 4;
     config.lru_purge_enable = true;
@@ -92,5 +98,9 @@ httpd_handle_t start_plug_server(void)
         };
         httpd_register_uri_handler(server, &plgu_ctrl_api_uri);
     }
-    return server;
+}
+
+void stop_plug_server(void)
+{
+    httpd_stop(server);
 }

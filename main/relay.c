@@ -1,11 +1,11 @@
-#include "platform_relay.h"
+#include "relay.h"
 #include <stdint.h>
 #include <string.h>
 #include "driver/gpio.h"
 
 platform_relay_t s_relay;
 
-void init_relay(uint32_t* gpio, uint8_t* active_level, uint8_t gpio_num)
+void relay_init(uint32_t* gpio, uint8_t* active_level, uint8_t gpio_num)
 {
     if (gpio == NULL || active_level == NULL || gpio_num == 0) {
         return;
@@ -18,7 +18,7 @@ void init_relay(uint32_t* gpio, uint8_t* active_level, uint8_t gpio_num)
     io_conf.intr_type = GPIO_INTR_DISABLE;
     io_conf.pin_bit_mask = (1ULL << gpio[0]) | (1ULL << gpio[1]);
     //set as output mode
-    io_conf.mode = GPIO_MODE_OUTPUT_OD;
+    io_conf.mode = GPIO_MODE_OUTPUT;
     //disable pull-down mode
     io_conf.pull_down_en = 0;
     //disable pull-up mode
