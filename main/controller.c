@@ -12,6 +12,9 @@
 #include "ap_server.h"
 #include "wifi_module.h"
 
+// Interfaces
+#include "../interfaces/power_mon_if.h"
+
 // Standard Libs
 #include <stdint.h>
 #include <stdio.h>
@@ -25,6 +28,7 @@ typedef enum controller_state {
 
 static QueueHandle_t s_queue;
 controller_state_t s_state;
+static Pwr_mon_i* s_pwr_mon;
 uint8_t s_retry_ap = 0;
 
 static void controller_task(void* pvParams)
@@ -42,6 +46,7 @@ static void controller_task(void* pvParams)
                         wifi_start_sta(s_queue);
                         s_state = PLUG_SERVER;
                     } else {
+                        printf("NVS Failed");
                         wifi_init_ap();
                         wifi_start_ap(s_queue);
                         s_state = AP_SERVER;
@@ -50,8 +55,10 @@ static void controller_task(void* pvParams)
                 }
                 case AP_SERVER: {
                     if (msg_id == START_AP_SUCCESS) {
+                        printf("AP Success");
                         start_ap_server(s_queue);
                     } else if (msg_id == START_AP_FAILED) {
+                        printf("AP failed");
                         s_retry_ap++;
                         wifi_init_ap();
                         wifi_start_ap(s_queue);
@@ -67,18 +74,28 @@ static void controller_task(void* pvParams)
                     }
                     break;
                 }
+                // This is where all the main functionality will be
                 case PLUG_SERVER: {
                     if(msg_id == START_STA_SUCCESS) {
-                        start_plug_server(s_queue);
+                        printf("STA SUCCESS");
+                        start_plug_server(s_queue, s_pwr_mon);
+                        s_pwr_mon->init(s_pwr_mon);
+                        s_pwr_mon->start(s_pwr_mon);
                     } else if (msg_id == START_STA_FAILED) {
-                        wifi_init_ap();
-                        wifi_start_ap(s_queue);
-                        s_state = AP_SERVER;
+                        printf("STA FAILED");
+                        wifi_stop_sta();
+                        wifi_delete_credentials();
+                        s_state = VALIDATE_NVS;
                     } else if (msg_id == DELETE_DATA) {
+                        // Data Delete command
+                        s_pwr_mon->stop(s_pwr_mon);
                         stop_plug_server();
                         wifi_stop_sta();
                         wifi_delete_credentials();
                         s_state = VALIDATE_NVS;
+                    } else if (msg_id == MEASURE_POWER) {
+                        // Periodic Power Measurement
+                        s_pwr_mon->measure_power(s_pwr_mon, 100);
                     }
                     break;
                 }
@@ -89,18 +106,20 @@ static void controller_task(void* pvParams)
     }
 }
 
-void controller_init(void)
+QueueHandle_t controller_init(void)
 {
     printf("Controller Init\n");
     s_queue = xQueueCreate(12, MAX_MSG_SIZE);
-    xTaskCreate(controller_task, "controller_task", 8196, NULL, 12, NULL);
+    xTaskCreate(controller_task, "controller_task", 16384, NULL, 12, NULL);
     s_state = VALIDATE_NVS;
+    return s_queue;
 }
 
-void controller_start(void)
+void controller_start(Pwr_mon_i* pwr_intf)
 {
     printf("Controller Start\n");
     uint8_t msg[32] = {0};
     msg[0] = START_NVS_VALIDATION;
+    s_pwr_mon = pwr_intf;
     xQueueSend(s_queue, msg, 0);
 }

@@ -55,8 +55,8 @@ static struct WifiStruct {
 //Wifi Variables
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
+
 static EventGroupHandle_t s_wifi_event_group;
-static int s_retry_num = 0;
 static QueueHandle_t s_queue;
 
 // Wifi Handler
@@ -66,7 +66,8 @@ static void wifi_sta_event_handler(void* arg, esp_event_base_t event_base,
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        if (s_retry_num < CONNECT_ATTEMPTS) {
+        if (s_self.retry_num < CONNECT_ATTEMPTS) {
+            printf("Reattempting: %d\n", s_self.retry_num);
             esp_wifi_connect();
             s_self.retry_num++;
         } else {
@@ -206,12 +207,12 @@ void wifi_start_sta(QueueHandle_t queue)
             .sae_pwe_h2e = WPA3_SAE_PWE_BOTH,
         },
     };
+    s_self.retry_num = 0;
     memcpy(wifi_cfg.sta.ssid, s_self.ssid, 32);
     memcpy(wifi_cfg.sta.password, s_self.password, 32);
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg));
     ESP_ERROR_CHECK(esp_wifi_start());
-
     EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
             WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
             pdFALSE,
@@ -223,6 +224,7 @@ void wifi_start_sta(QueueHandle_t queue)
         msg[0] = START_STA_SUCCESS;
         s_self.connected = true;
     } else if (bits & WIFI_FAIL_BIT) {
+        printf("Failed to connect\n");
         s_self.connected = false;
         msg[0] = START_STA_FAILED;
     }
@@ -251,9 +253,11 @@ void wifi_start_ap(QueueHandle_t queue)
 void wifi_stop_sta(void)
 {
     esp_wifi_deinit();
+    esp_wifi_clear_default_wifi_driver_and_handlers(s_self.wifi_if);
 }
 
 void wifi_stop_ap(void)
 {
     esp_wifi_deinit();
+    esp_wifi_clear_default_wifi_driver_and_handlers(s_self.wifi_if);
 }

@@ -23,4 +23,6 @@ void set_relay(uint32_t relay_num, uint8_t pwr_on);
 
 void relay_close(void);
 
+void set_relay_timers(uint8_t timer_num, uint16_t sample_freq);
+
 #endif // RELAY_H_

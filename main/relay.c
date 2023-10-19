@@ -30,19 +30,16 @@ void relay_init(uint32_t* gpio, uint8_t* active_level, uint8_t gpio_num)
     s_relay.pin_nums[0] = gpio[0];
     s_relay.pin_nums[1] = gpio[1];
     s_relay.relay_num = gpio_num;
-    set_relay(0, 1);
-    set_relay(1, 1);
 }
 
 uint8_t get_relay_num(void)
 {
-
     return s_relay.relay_num;
 }
 
 uint8_t get_relay(uint8_t relay_num)
 {
-    return 0;
+    return s_relay.pwr_on[relay_num];
 }
 
 void set_relay(uint32_t relay_num, uint8_t pwr_on)
@@ -60,7 +57,6 @@ void set_relay(uint32_t relay_num, uint8_t pwr_on)
             gpio_lvl = 1;
         }
     }
-    printf("gpio_level: %d\n", gpio_lvl);
-    printf("Pin Number: %ld\n", s_relay.pin_nums[relay_num]);
+    s_relay.pwr_on[relay_num] = pwr_on;
     gpio_set_level(s_relay.pin_nums[relay_num], gpio_lvl);
 }
