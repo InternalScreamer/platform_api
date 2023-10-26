@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Platform API</title>
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Platform API</title>
+        <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #000;
@@ -124,38 +124,39 @@
             width: 100%;
         }
     </style>
-</head>
-<body>
-    <header>
-        <h1>Platform Relay</h1>
-    </header>
+    </head>
+    <body>
+        <header>
+            <h1>Platform Relay</h1>
+        </header>
 
-    <div class="container">
-        <div class="box">
+        <div class="container">
+            <div class="box">
 
-            <h2>Power Switches</h2>
-            <h3>Switch 0:</h2>
-            <label class="switch">
-                <input type="checkbox" onclick="sendRelay()" id="sw0">
-                <span class="slider round"></span>
-            </label>
-            <h3>Switch 1:</h2>
-            <label class="switch">
-                <input type="checkbox" onclick="sendRelay()" id="sw1">
-                <span class="slider round"></span>
-            </label>
+                <h2>Power Switches</h2>
+                <h3>Switch 0:</h2>
+                <label class="switch">
+                    <input type="checkbox" onclick="sendRelay()" id="sw0">
+                    <span class="slider round"></span>
+                </label>
+                <h3>Switch 1:</h2>
+                <label class="switch">
+                    <input type="checkbox" onclick="sendRelay()" id="sw1">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="box">
+                <h2>Power Monitor</h2>
+                <script
+                    src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+                <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+            </div>
+            <div class="box">
+                <h2>Timers</h2>
+                <input type="time" class="alarm-input" id="alarmTime">
+            </div>
         </div>
-        <div class="box">
-            <h2>Power Monitor</h2>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
-            <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
-        </div>
-        <div class="box">
-            <h2>Timers</h2>
-            <input type="time" class="alarm-input" id="alarmTime">
-        </div>
-    </div>
-    <script>
+        <script>
     var xValues = [100,200,300,400,500,600,700,800,900,1000, 1100, 1200, 1300, 1400, 1500];
 
     function sendRelay() {
@@ -227,8 +228,8 @@
         });
     });
     </script>
-    <footer>
-        &copy; 2023 Your Company Name
-    </footer>
-</body>
+        <footer>
+            &copy; 2023 Your Company Name
+        </footer>
+    </body>
 </html>
